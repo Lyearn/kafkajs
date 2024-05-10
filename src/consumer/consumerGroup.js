@@ -18,7 +18,6 @@ const {
   KafkaJSStaleTopicMetadataAssignment,
   isRebalancing,
 } = require('../errors')
-const { profile } = require('console')
 
 const { keys } = Object
 
