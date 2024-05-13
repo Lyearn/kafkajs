@@ -447,7 +447,7 @@ module.exports = class ConsumerGroup {
       throw error
     } finally {
       const timeDiffMili = new Date().getTime() - startTime.getTime()
-      this.logger.info('Completed Committing offsets', {
+      this.logger.info('ConsumerGroup: Completed Committing offsets', {
         durationMs: timeDiffMili,
         offsets,
       })

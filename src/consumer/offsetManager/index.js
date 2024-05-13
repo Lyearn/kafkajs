@@ -247,6 +247,8 @@ module.exports = class OffsetManager {
   }
 
   async commitOffsets(offsets = {}) {
+    const startTime = new Date()
+
     const { groupId, generationId, memberId, groupInstanceId } = this
     const { topics = this.uncommittedOffsets().topics } = offsets
 
@@ -263,6 +265,7 @@ module.exports = class OffsetManager {
       topics,
     }
 
+    const toCommitOffsets = []
     try {
       const coordinator = await this.getCoordinator()
       await coordinator.offsetCommit(payload)
@@ -291,6 +294,12 @@ module.exports = class OffsetManager {
       }
 
       throw e
+    } finally {
+      const timeDiffMili = new Date().getTime() - startTime.getTime()
+      this.logger.info('OffsetManager: Completed Committing offsets', {
+        durationMs: timeDiffMili,
+        offsets: toCommitOffsets,
+      })
     }
   }
 
