@@ -443,7 +443,9 @@ module.exports = class ConsumerGroup {
     const startTime = new Date()
     try {
       await this.offsetManager.commitOffsets(offsets)
-    } catch (error) {} finally {
+    } catch (error) {
+      throw error;
+    } finally {
       const timeDiffMili = new Date().getTime() - startTime.getTime()
       this.logger.info({ message: 'Completed Committing offsets', durationMs: timeDiffMili, payload: { offsets } })
     }
