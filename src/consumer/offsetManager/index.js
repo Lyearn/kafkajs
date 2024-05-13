@@ -278,6 +278,8 @@ module.exports = class OffsetManager {
           {}
         )
 
+        toCommitOffsets.push(...updatedOffsets)
+
         this[PRIVATE.COMMITTED_OFFSETS][topic] = assign(
           {},
           this.committedOffsets()[topic],
