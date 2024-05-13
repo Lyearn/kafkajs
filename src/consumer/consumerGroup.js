@@ -440,11 +440,13 @@ module.exports = class ConsumerGroup {
   }
 
   async commitOffsets(offsets) {
-    this.logger.info({ message: 'Starting to commit  offsets', payload: { offsets } })
     const startTime = new Date()
-    await this.offsetManager.commitOffsets(offsets)
-    const timeDiffMili = new Date().getTime() - startTime.getTime()
-    this.logger.info({ message: 'Completed Committing offsets', durationMs: timeDiffMili })
+    try {
+      await this.offsetManager.commitOffsets(offsets)
+    } catch (error) {} finally {
+      const timeDiffMili = new Date().getTime() - startTime.getTime()
+      this.logger.info({ message: 'Completed Committing offsets', durationMs: timeDiffMili, payload: { offsets } })
+    }
   }
 
   uncommittedOffsets() {
