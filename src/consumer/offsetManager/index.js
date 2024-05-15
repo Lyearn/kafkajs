@@ -1,6 +1,7 @@
 const Long = require('../../utils/long')
 const isInvalidOffset = require('./isInvalidOffset')
 const initializeConsumerOffsets = require('./initializeConsumerOffsets')
+const { logger } = require('@lyearn/classroom-utils')
 const {
   events: { COMMIT_OFFSETS },
 } = require('../instrumentationEvents')
@@ -247,6 +248,8 @@ module.exports = class OffsetManager {
   }
 
   async commitOffsets(offsets = {}) {
+    const commitOffsetsProfiler = logger.startTimer()
+
     const { groupId, generationId, memberId, groupInstanceId } = this
     const { topics = this.uncommittedOffsets().topics } = offsets
 
@@ -263,6 +266,7 @@ module.exports = class OffsetManager {
       topics,
     }
 
+    const toCommitOffsets = []
     try {
       const coordinator = await this.getCoordinator()
       await coordinator.offsetCommit(payload)
@@ -274,6 +278,8 @@ module.exports = class OffsetManager {
           (obj, { partition, offset }) => assign(obj, { [partition]: offset }),
           {}
         )
+
+        toCommitOffsets.push({ topic, updatedOffsets })
 
         this[PRIVATE.COMMITTED_OFFSETS][topic] = assign(
           {},
@@ -291,6 +297,11 @@ module.exports = class OffsetManager {
       }
 
       throw e
+    } finally {
+      commitOffsetsProfiler.done({
+        message: 'OffsetManager: Completed Committing offsets',
+        payload: { offsets: toCommitOffsets },
+      })
     }
   }
 
